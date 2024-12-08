@@ -1,81 +1,56 @@
-body {
-    background: linear-gradient(120deg, #000428, #004e92);
-    color: #ffffff;
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
+document.getElementById('fetchAsteroids').addEventListener('click', () => {
+    const apiKey = "ZwLlnV5qUrs7GFXoH0R6knI7THU1IT4SGPK5ZTV3";
+    const apiUrl = `https://api.nasa.gov/neo/rest/v1/feed?start_date=2024-12-08&end_date=2024-12-09&api_key=${apiKey}`;
 
-.container {
-    text-align: center;
-    width: 80%;
-    max-width: 800px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 0 20px #00d4ff;
-}
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            const asteroidContainer = document.getElementById('asteroidData');
+            asteroidContainer.innerHTML = ""; // Clear old data
 
-h1 {
-    font-size: 2em;
-    color: #00d4ff;
-    text-shadow: 0 0 10px #00ffff;
-}
+            const asteroids = data.near_earth_objects["2024-12-08"];
+            if (asteroids.length > 0) {
+                asteroids.forEach(asteroid => {
+                    const size = Math.round(asteroid.estimated_diameter.meters.estimated_diameter_max);
+                    const distance = Math.round(asteroid.close_approach_data[0].miss_distance.kilometers);
+                    const velocity = Math.round(asteroid.close_approach_data[0].relative_velocity.kilometers_per_hour);
+                    const isHazardous = asteroid.is_potentially_hazardous_asteroid;
 
-button {
-    background: #00d4ff;
-    color: #000;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
+                    // Calculate a simple probability of impact
+                    const hitProbability = Math.min(100, Math.round((1 / distance) * 100000));
 
-button:hover {
-    background: #00a3cc;
-}
+                    // Size comparison logic
+                    let sizeComparison = "a car";
+                    if (size > 50) sizeComparison = "a school bus";
+                    if (size > 100) sizeComparison = "a skyscraper";
+                    if (size > 500) sizeComparison = "an entire football field";
 
-#asteroidData {
-    margin-top: 20px;
-    padding: 10px;
-    background: #00000080;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #00d4ff;
-}
-
-.asteroid {
-    margin: 20px 0;
-    padding: 15px;
-    border: 1px solid #00d4ff;
-    border-radius: 5px;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-}
-
-.asteroid img {
-    width: 100px;
-    height: 100px;
-    border-radius: 10px;
-    margin-right: 20px;
-}
-
-.asteroid-info {
-    text-align: left;
-}
-
-.asteroid-info strong {
-    color: #00d4ff;
-}
-
-.chances {
-    margin-top: 10px;
-    font-size: 1em;
-    color: #ff5e57;
-}
+                    // Include a random image of an asteroid for illustration
+                    const imageUrl = "https://source.unsplash.com/100x100/?asteroid,space";
+                    
+                    const element = document.createElement('div');
+                    element.className = "asteroid";
+                    element.innerHTML = `
+                        <img src="${imageUrl}" alt="Asteroid Image">
+                        <div class="asteroid-info">
+                            <strong>Name:</strong> ${asteroid.name} <br>
+                            <strong>Size:</strong> ${size} meters (about ${sizeComparison}) <br>
+                            <strong>Velocity:</strong> ${velocity} km/h <br>
+                            <strong>Distance:</strong> ${distance} km <br>
+                            <strong>Hazardous:</strong> ${isHazardous ? "Yes 🚨" : "No ✅"}
+                            <div class="chances">
+                                <strong>Impact Probability:</strong> ${hitProbability}% ${hitProbability > 50 ? "⚠️" : ""}
+                            </div>
+                        </div>
+                    `;
+                    asteroidContainer.appendChild(element);
+                });
+            } else {
+                asteroidContainer.innerHTML = "<p>No asteroids found near Earth for the selected date.</p>";
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            document.getElementById('asteroidData').innerHTML = "<p>Unable to fetch asteroid data. Please try again later.</p>";
+        });
+});
