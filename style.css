@@ -51,8 +51,31 @@ button:hover {
 
 .asteroid {
     margin: 10px 0;
-    padding: 10px;
+    padding: 15px;
     border: 1px solid #00d4ff;
     border-radius: 5px;
     background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+}
+
+.asteroid img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+.asteroid-info {
+    text-align: left;
+}
+
+.asteroid-info strong {
+    color: #00d4ff;
+}
+
+.chances {
+    margin-top: 10px;
+    font-size: 1em;
+    color: #ff5e57;
 }
